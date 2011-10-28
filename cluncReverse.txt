@@ -1,0 +1,59 @@
+# source code from clunc (GPL)
+
+#   # define LUMP_MAC_OFFSET 2
+#   
+#   struct lump_header {
+#           char name [4] ;
+#           uint32_t size ;
+#   } ;
+#   
+#   # define LUMP_FIELD(type,value_size) \
+#           lump_ ## type ## _field { \
+#                   struct lump_header field_header ; \
+#                   struct lump_header type_header ; \
+#                   uint8_t value [value_size] ; \
+#           }
+#   
+#   struct LUMP_FIELD (generic, 0) ; /* lump_generic_field */
+#   struct LUMP_FIELD (mac, LUMP_MAC_OFFSET + ETH_ALEN) ; /* lump_mac_field */
+#   struct LUMP_FIELD (ip, sizeof (in_addr_t)) ; /* lump_ip_field */
+#   
+#   struct lump {
+#           struct lump_header packet_header ;
+#           struct lump_mac_field target_mac ;
+#           struct lump_mac_field new_mac ;
+#           struct lump_ip_field new_ip ;
+#   } ;
+# define LUMP_PACKET "LUMP"
+# define MAC_TYPE    "MAC@"
+# define MACD_FIELD  "MACD"
+# define MACS_FIELD  "MACS"
+# define IP_TYPE     "IP@"
+# define IPS_FIELD   "IPS"
+#            write_header (PTR_SIZE (*lump), LUMP_PACKET) ;
+#
+#            error_code = write_field (PTR_SIZE (lump->target_mac), MACD_FIELD, MAC_TYPE, target_mac, convert_mac) ;
+#            if (error_code != 0) {
+#                    eprintf ("syntax error (target MAC)") ;
+#                    return -1 ;
+#            }
+#    
+#            error_code = write_field (PTR_SIZE (lump->new_mac), MACS_FIELD, MAC_TYPE, new_mac, convert_mac) ;
+#            if (error_code != 0) {
+#                    eprintf ("syntax error (new MAC)") ;
+#                    return -1 ;
+#            }
+#    
+#            error_code = write_field (PTR_SIZE (lump->new_ip), IPS_FIELD, IP_TYPE, new_ip, convert_ip) ;
+#            if (error_code != 0) {
+#                    eprintf ("syntax error (new IP)") ;
+#                    return -1 ;
+#            }
+
+# Packet dumps from wireshark:
+
+#  PlainPacket =    '\x4c\x55\x4d\x50\x00\x00\x00\x44\x4d\x41\x43\x44\x00\x00\x00\x10\x4d\x41\x43\x40\x00\x00\x00\x08\x00\x00\x00\x00\x00\x00\x00\x00\x4d\x41\x43\x53\x00\x00\x00\x10\x4d\x41\x43\x40\x00\x00\x00\x08\x00\x00\x00\x00\x00\x00\x00\x00\x49\x50\x53\x00\x00\x00\x00\x0c\x49\x50\x40\x00\x00\x00\x00\x04\x00\x00\x00\x00'
+#  IPPacket =       '\x4c\x55\x4d\x50\x00\x00\x00\x44\x4d\x41\x43\x44\x00\x00\x00\x10\x4d\x41\x43\x40\x00\x00\x00\x08\x00\x00\x00\x00\x00\x00\x00\x00\x4d\x41\x43\x53\x00\x00\x00\x10\x4d\x41\x43\x40\x00\x00\x00\x08\x00\x00\x00\x00\x00\x00\x00\x00\x49\x50\x53\x00\x00\x00\x00\x0c\x49\x50\x40\x00\x00\x00\x00\x04\xc0\xa8\x01\x03'
+#  MACPacket =      '\x4c\x55\x4d\x50\x00\x00\x00\x44\x4d\x41\x43\x44\x00\x00\x00\x10\x4d\x41\x43\x40\x00\x00\x00\x08\x00\x00\x00\xd0\x4b\x8d\x32\xaa\x4d\x41\x43\x53\x00\x00\x00\x10\x4d\x41\x43\x40\x00\x00\x00\x08\x00\x00\x00\x00\x00\x00\x00\x00\x49\x50\x53\x00\x00\x00\x00\x0c\x49\x50\x40\x00\x00\x00\x00\x04\x00\x00\x00\x00'
+#  IPandMACPacket = '\x4c\x55\x4d\x50\x00\x00\x00\x44\x4d\x41\x43\x44\x00\x00\x00\x10\x4d\x41\x43\x40\x00\x00\x00\x08\x00\x00\x00\xd0\x4b\x8d\x32\xaa\x4d\x41\x43\x53\x00\x00\x00\x10\x4d\x41\x43\x40\x00\x00\x00\x08\x00\x00\x00\x00\x00\x00\x00\x00\x49\x50\x53\x00\x00\x00\x00\x0c\x49\x50\x40\x00\x00\x00\x00\x04\xc0\xa8\x01\x03'
+
