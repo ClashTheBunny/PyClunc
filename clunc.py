@@ -20,11 +20,11 @@ header = binascii.b2a_hex(struct.pack('!' + lumpHeader,'LUMP',struct.calcsize('!
 
 # Target MAC Address
 targetMAC = '\x00\xd0\x4b\x8d\x32\xaa'
-targetMACstring = binascii.b2a_hex(struct.pack('!' + lumpMACField ,'MACD', 16, 'MAC@',(lumpMACoffset + eth_alen),targetMAC))
+targetMACstring = binascii.b2a_hex(struct.pack('!' + lumpMACField ,'MACD', 16, 'MAC@',(lumpMACoffset + eth_alen),'\x00'*lumpMACoffset + targetMAC))
 
 # New MAC Address
-newMAC = '\x00'*(lumpMACoffset + eth_alen)
-newMACstring = binascii.b2a_hex(struct.pack('!' + lumpMACField ,'MACS', 16, 'MAC@',(lumpMACoffset + eth_alen),newMAC))
+newMAC = '\x00'*(lumpMACoffset + eth_alen) # set to zeros to not use
+newMACstring = binascii.b2a_hex(struct.pack('!' + lumpMACField ,'MACS', 16, 'MAC@',(lumpMACoffset + eth_alen), '\x00'*lumpMACoffset + newMAC))
 
 # New IP Address
 newIP = '\x00'*ipv4AddrSize
