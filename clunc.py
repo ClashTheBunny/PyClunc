@@ -17,21 +17,23 @@ from twisted.python import log
 
 log.startLogging(sys.stdout) 
  
-port = 7154 
+port = 6666 
  
 class BroadcastingDatagramProtocol(protocol.DatagramProtocol): 
   port = port 
+  def __init__(self, port):
+    self.port = port
   def startProtocol(self): 
     self.transport.socket.setsockopt(SOL_SOCKET, SO_BROADCAST, True) 
     self.call = task.LoopingCall(self.tick) 
-    self.dcall = self.call.start(1.0) 
+    self.dcall = self.call.start(.5) 
   def stopProtocol(self): 
     self.call.stop() 
   def tick(self): 
-    self.transport.write(self.getPacket(ip='192.168.1.3'), ("<broadcast>", self.port)) 
+    self.transport.write(self.getPacket('192.168.1.6'), ("<broadcast>", self.port)) 
   def datagramReceived(self, data, addr): 
     print "Received", repr(data) 
-  def getPacket(self,ip='\x00\x00\x00\x00',mac='\x00\x00\x00\x00\x00\x00'):
+  def getPacket(self,ip='0.0.0.0',targetMac='00:00:00:00:00:00',newMac='00:00:00:00:00:00'):
     lumpMACoffset = 2
     eth_alen = 6
     ipv4AddrSize = 4
@@ -41,15 +43,15 @@ class BroadcastingDatagramProtocol(protocol.DatagramProtocol):
     lumpPacket = lumpHeader + lumpMACField*2 + lumpIPField
     header = struct.pack('!' + lumpHeader,'LUMP',struct.calcsize('!' + lumpPacket) - struct.calcsize('!' + lumpHeader))
     # Target MAC Address
-    targetMAC = mac
+    targetMAC = binascii.a2b_hex(''.join(targetMac.split(":")))
     targetMAC = struct.pack('!' + lumpMACField ,'MACD', 16, 'MAC@',(lumpMACoffset + eth_alen),'\x00'*lumpMACoffset + targetMAC)
     # New MAC Address
-    newMAC = '\x00'*(lumpMACoffset + eth_alen) # set to zeros to not use; always zero in clunc
+    newMAC = binascii.a2b_hex(''.join(newMac.split(":")))
     newMAC = struct.pack('!' + lumpMACField ,'MACS', 16, 'MAC@',(lumpMACoffset + eth_alen), '\x00'*lumpMACoffset + newMAC)
     # New IP Address
     newIP = socket.inet_aton(ip)
     newIP = struct.pack('!' + lumpIPField ,'IPS', 12, 'IP@',ipv4AddrSize,newIP)
     return header + targetMAC + newMAC + newIP
 
-reactor.listenUDP(port, BroadcastingDatagramProtocol()) 
+reactor.listenUDP(port, BroadcastingDatagramProtocol(4446)) 
 reactor.run()
